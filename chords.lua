@@ -284,20 +284,21 @@ db={
   {m=131,i="B9",f=15804.264,y="b9"},
 }
 
-notes_white={"C","D","E","F","G","A","B"}
-notes_scale_sharp={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B"}
-notes_scale_acc1={"B#","Db","D","Eb","Fb","E#","Gb","G","Ab","A","Bb","Cb"}
-notes_scale_acc2={"C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B"}
-notes_scale_acc3={"Bs","Db","D","Eb","Fb","Es","Gb","G","Ab","A","Bb","Cb"}
-notes_adds={"","#","b","s"}
-notes_all={}
-for i,n in ipairs(notes_white) do
-  for j,a in ipairs(notes_adds) do
-    table.insert(notes_all,(n..a))
-  end
-end
-
 function chords_to_notes(c,return_names)
+  -- static dictionaries
+  notes_white={"C","D","E","F","G","A","B"}
+  notes_scale_sharp={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B"}
+  notes_scale_acc1={"B#","Db","D","Eb","Fb","E#","Gb","G","Ab","A","Bb","Cb"}
+  notes_scale_acc2={"C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B"}
+  notes_scale_acc3={"Bs","Db","D","Eb","Fb","Es","Gb","G","Ab","A","Bb","Cb"}
+  notes_adds={"","#","b","s"}
+  notes_all={}
+  for i,n in ipairs(notes_white) do
+    for j,a in ipairs(notes_adds) do
+      table.insert(notes_all,(n..a))
+    end
+  end
+  
   chord_match=""
   
   -- get octave
