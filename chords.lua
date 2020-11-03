@@ -297,9 +297,9 @@ for i,n in ipairs(notes_white) do
   end
 end
 
-function chords_to_notes(c)
+function chords_to_notes(c,octave,return_midi)
   chord_match=""
-
+  
   -- get transpositions
   transpose_note=''
   if string.match(c,"/") then
@@ -311,7 +311,7 @@ function chords_to_notes(c)
       end
     end
   end
-
+  
   -- find the root note name
   note_match=""
   transpose_note_match=""
@@ -339,7 +339,7 @@ function chords_to_notes(c)
   if note_match=="" then
     return {},false
   end
-
+  
   -- convert to canonical sharp scale
   -- e.g. Fb -> E, Gs -> G#
   for i,n in ipairs(notes_scale_acc1) do
@@ -380,7 +380,7 @@ function chords_to_notes(c)
       end
     end
   end
-
+  
   -- find longest matching chord pattern
   chord_match="" -- (no chord match is major chord)
   chord_intervals="1P 3m 5P"
@@ -395,7 +395,7 @@ function chords_to_notes(c)
     end
   end
   --print("chord_match for "..chord_rest..": "..chord_match)
-
+  
   -- find location of root
   root_position=1
   for i,n in ipairs(notes_scale_sharp) do
@@ -404,7 +404,7 @@ function chords_to_notes(c)
       break
     end
   end
-
+  
   -- find notes from intervals
   whole_note_semitones={0,2,4,5,7,9,11,12}
   notes_in_chord={}
@@ -423,7 +423,7 @@ function chords_to_notes(c)
     note_in_chord=notes_scale_sharp[root_position+semitones]
     table.insert(notes_in_chord,note_in_chord)
   end
-
+  
   -- if tranposition, rotate until new root
   print("transpose_note_match: "..transpose_note_match)
   if transpose_note_match~="" then
@@ -438,6 +438,26 @@ function chords_to_notes(c)
     if not found_note then
       table.insert(notes_in_chord,1,transpose_note_match)
     end
+  end
+  
+  -- convert to midi
+  if octave==nil then
+    octave=4
+  end
+  midi_notes_in_chord={}
+  last_note=0
+  for i,n in ipairs(notes_in_chord) do
+    for _,d in ipairs(db) do
+      if d.m>last_note and (d.i==n..octave or d.i==n..(octave+1)) then
+        last_note=d.m
+        table.insert(midi_notes_in_chord,d.m)
+        notes_in_chord[i]=d.i
+        break
+      end
+    end
+  end
+  if return_midi~=nil and return_midi then
+    return midi_notes_in_chord,true
   end
   return notes_in_chord,true
 end
