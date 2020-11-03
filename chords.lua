@@ -475,6 +475,12 @@ notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
   print(note)
 end
+c="Dmaj7"
+print("\n"..c)
+notes,ok=chords_to_notes(c,4,true)
+for _,note in ipairs(notes) do
+  print(note)
+end
 
 c="Em/C"
 print("\n"..c)
