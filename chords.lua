@@ -297,8 +297,20 @@ for i,n in ipairs(notes_white) do
   end
 end
 
-function chords_to_notes(c,octave,return_midi)
+function chords_to_notes(c,return_names)
   chord_match=""
+  
+  -- get octave
+  octave=4
+  if string.match(c,";") then
+    for i,s in pairs(c:split(";")) do
+      if i==1 then
+        c=s
+      else
+        octave=tonumber(s)
+      end
+    end
+  end
   
   -- get transpositions
   transpose_note=''
@@ -425,7 +437,6 @@ function chords_to_notes(c,octave,return_midi)
   end
   
   -- if tranposition, rotate until new root
-  print("transpose_note_match: "..transpose_note_match)
   if transpose_note_match~="" then
     found_note=false
     for i=1,#notes_in_chord do
@@ -448,7 +459,7 @@ function chords_to_notes(c,octave,return_midi)
   last_note=0
   for i,n in ipairs(notes_in_chord) do
     for _,d in ipairs(db) do
-      if d.m>last_note and (d.i==n..octave or d.i==n..(octave+1)) then
+      if d.m>last_note and (d.i==n..octave or d.i==n..(octave+1) or d.i==n..(octave+2) or d.i==n..(octave+3)) then
         last_note=d.m
         table.insert(midi_notes_in_chord,d.m)
         notes_in_chord[i]=d.i
@@ -456,13 +467,13 @@ function chords_to_notes(c,octave,return_midi)
       end
     end
   end
-  if return_midi~=nil and return_midi then
-    return midi_notes_in_chord,true
+  if return_names~=nil and return_names then
+    return notes_in_chord,true
   end
-  return notes_in_chord,true
+  return midi_notes_in_chord,true
 end
 
-c="Cmaj13/G"
+c="Cmaj13/G;3"
 print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
@@ -477,7 +488,7 @@ for _,note in ipairs(notes) do
 end
 c="Dmaj7"
 print("\n"..c)
-notes,ok=chords_to_notes(c,4,true)
+notes,ok=chords_to_notes(c,true)
 for _,note in ipairs(notes) do
   print(note)
 end
@@ -494,9 +505,4 @@ print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
   print(note)
-end
-
-a="Am/E"
-for _,s in ipairs(a:split("/")) do
-  print(s)
 end
