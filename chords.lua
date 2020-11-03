@@ -1,8 +1,8 @@
 function string:split(sep)
-   local sep, fields = sep or ":", {}
-   local pattern = string.format("([^%s]+)", sep)
-   self:gsub(pattern, function(c) fields[#fields+1] = c end)
-   return fields
+  local sep,fields=sep or ":",{}
+  local pattern=string.format("([^%s]+)",sep)
+  self:gsub(pattern,function(c) fields[#fields+1]=c end)
+  return fields
 end
 
 db_chords={{"1P 3M 5P","major","M","^",""},
@@ -299,23 +299,29 @@ end
 
 function chords_to_notes(c)
   chord_match=""
-  
+
   -- get transpositions
-  ctranspose=''
+  transpose_note=''
   if string.match(c,"/") then
-    for i,s in c:split("/") do
-	if i == 0 then 
-		c=s
-	else
-		ctranspose=s
-	end
+    for i,s in pairs(c:split("/")) do
+      if i==1 then
+        c=s
+      else
+        transpose_note=s
+      end
     end
   end
-  
+
   -- find the root note name
   note_match=""
+  transpose_note_match=""
   chord_rest=""
   for i,n in ipairs(notes_all) do
+    if transpose_note~="" and #n>#transpose_note_match then
+      if n:lower()==transpose_note or n==transpose_note then
+        transpose_note_match=n
+      end
+    end
     if #n>#note_match then
       -- check if has prefix
       s,e=c:find(n)
@@ -333,7 +339,7 @@ function chords_to_notes(c)
   if note_match=="" then
     return {},false
   end
-  
+
   -- convert to canonical sharp scale
   -- e.g. Fb -> E, Gs -> G#
   for i,n in ipairs(notes_scale_acc1) do
@@ -354,7 +360,27 @@ function chords_to_notes(c)
       break
     end
   end
-  
+  if transpose_note_match~="" then
+    for i,n in ipairs(notes_scale_acc1) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+    for i,n in ipairs(notes_scale_acc2) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+    for i,n in ipairs(notes_scale_acc3) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+  end
+
   -- find longest matching chord pattern
   chord_match="" -- (no chord match is major chord)
   chord_intervals="1P 3m 5P"
@@ -368,7 +394,8 @@ function chords_to_notes(c)
       end
     end
   end
-  
+  --print("chord_match for "..chord_rest..": "..chord_match)
+
   -- find location of root
   root_position=1
   for i,n in ipairs(notes_scale_sharp) do
@@ -377,7 +404,7 @@ function chords_to_notes(c)
       break
     end
   end
-  
+
   -- find notes from intervals
   whole_note_semitones={0,2,4,5,7,9,11,12}
   notes_in_chord={}
@@ -396,12 +423,26 @@ function chords_to_notes(c)
     note_in_chord=notes_scale_sharp[root_position+semitones]
     table.insert(notes_in_chord,note_in_chord)
   end
-  
-  -- TODO: if tranposition, rotate until new root
+
+  -- if tranposition, rotate until new root
+  print("transpose_note_match: "..transpose_note_match)
+  if transpose_note_match~="" then
+    found_note=false
+    for i=1,#notes_in_chord do
+      if notes_in_chord[1]==transpose_note_match then
+        found_note=true
+        break
+      end
+      table.insert(notes_in_chord,table.remove(notes_in_chord,1))
+    end
+    if not found_note then
+      table.insert(notes_in_chord,1,transpose_note_match)
+    end
+  end
   return notes_in_chord,true
 end
 
-c="Cmaj13"
+c="Cmaj13/G"
 print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
@@ -415,14 +456,14 @@ for _,note in ipairs(notes) do
   print(note)
 end
 
-c="Em"
+c="Em/C"
 print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
   print(note)
 end
 
-c="Gbm"
+c="Gbm/Db"
 print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
@@ -430,6 +471,6 @@ for _,note in ipairs(notes) do
 end
 
 a="Am/E"
-for _, s in ipairs(a:split("/")) do
-	print(s)
+for _,s in ipairs(a:split("/")) do
+  print(s)
 end
