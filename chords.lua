@@ -1,3 +1,10 @@
+function string:split(sep)
+   local sep, fields = sep or ":", {}
+   local pattern = string.format("([^%s]+)", sep)
+   self:gsub(pattern, function(c) fields[#fields+1] = c end)
+   return fields
+end
+
 db_chords={{"1P 3M 5P","major","M","^",""},
   {"1P 3M 5P 7M","major seventh","maj7","Δ","ma7","M7","Maj7","^7"},
   {"1P 3M 5P 7M 9M","major ninth","maj9 Δ9 ^9"},
@@ -292,7 +299,18 @@ end
 
 function chords_to_notes(c)
   chord_match=""
-  -- TODO: get transpositions
+  
+  -- get transpositions
+  ctranspose=''
+  if string.match(c,"/") then
+    for i,s in c:split("/") do
+	if i == 0 then 
+		c=s
+	else
+		ctranspose=s
+	end
+    end
+  end
   
   -- find the root note name
   note_match=""
@@ -409,4 +427,9 @@ print("\n"..c)
 notes,ok=chords_to_notes(c)
 for _,note in ipairs(notes) do
   print(note)
+end
+
+a="Am/E"
+for _, s in ipairs(a:split("/")) do
+	print(s)
 end
